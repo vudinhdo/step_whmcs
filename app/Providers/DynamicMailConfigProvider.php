@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class DynamicMailConfigProvider extends ServiceProvider
+{
+    public function register() {}
+
+    public function boot(): void
+    {
+        config([
+            'mail.mailers.smtp.host'       => setting('mail_host', config('mail.mailers.smtp.host')),
+            'mail.mailers.smtp.port'       => setting('mail_port', config('mail.mailers.smtp.port')),
+            'mail.mailers.smtp.username'   => setting('mail_username', config('mail.mailers.smtp.username')),
+            'mail.mailers.smtp.password'   => setting('mail_password', config('mail.mailers.smtp.password')),
+            'mail.mailers.smtp.encryption' => setting('mail_encryption', config('mail.mailers.smtp.encryption')),
+            'mail.from.address'            => setting('mail_from_address', config('mail.from.address')),
+            'mail.from.name'               => setting('mail_from_name', config('mail.from.name')),
+        ]);
+    }
+}
