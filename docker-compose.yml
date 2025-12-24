@@ -1,0 +1,64 @@
+version: '3'
+services:
+    # PHP Application (Laravel)
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: laravel-app                   # Tên image tuỳ chọn cho ứng dụng
+        container_name: app
+        restart: unless-stopped
+        tty: true
+        environment:
+            SERVICE_NAME: app
+            SERVICE_TAGS: dev
+        working_dir: /var/www
+        volumes:
+            - ./:/var/www                      # Mount toàn bộ mã nguồn vào /var/www
+            - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini  # PHP overrides
+        networks:
+            - app-network
+
+    # Nginx Web Server
+    webserver:
+        image: nginx:alpine
+        container_name: webserver
+        restart: unless-stopped
+        tty: true
+        ports:
+            - "80:80"                          # Map cổng 80 của container ra 80 host
+            - "443:443"                        # Map cổng 443 (HTTPS) nếu cần
+        volumes:
+            - ./:/var/www                      # Mount mã nguồn (để Nginx phục vụ)
+            - ./nginx/:/etc/nginx/conf.d/      # Mount cấu hình Nginx tùy chỉnh
+        networks:
+            - app-network
+
+    # MySQL Database
+    db:
+        image: mysql:5.7.22
+        container_name: db
+        restart: unless-stopped
+        tty: true
+        ports:
+            - "3306:3306"                      # Map cổng MySQL ra ngoài (tùy chọn)
+        environment:
+            MYSQL_DATABASE: laravel
+            MYSQL_ROOT_PASSWORD: password      # Đặt mật khẩu root (thay bằng mật khẩu mạnh)
+            SERVICE_NAME: mysql
+            SERVICE_TAGS: dev
+        volumes:
+            - dbdata:/var/lib/mysql/           # Lưu trữ dữ liệu MySQL trên volume
+            - ./mysql/my.cnf:/etc/mysql/my.cnf # Mount file cấu hình MySQL tùy chỉnh (nếu có)
+        networks:
+            - app-network
+
+# Định nghĩa mạng docker
+networks:
+    app-network:
+        driver: bridge
+
+# Định nghĩa volume docker
+volumes:
+    dbdata:
+        driver: local

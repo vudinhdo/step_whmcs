@@ -19,7 +19,7 @@ class PricingRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('billing_cycle')
+                Forms\Components\Select::make('')
                     ->label('Chu kỳ')
                     ->options([
                         'monthly' => 'Tháng',
